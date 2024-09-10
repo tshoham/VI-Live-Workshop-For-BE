@@ -1,0 +1,41 @@
+
+[property]
+gpu-id=0
+#net-scale-factor=0.26856
+
+# from https://github.com/NVIDIA-AI-IOT/nanoowl/issues/6
+# y = net-scale-factor * (x - mean) so in pytorch where y = (x-mean) / std then we need to take 1/std (we took average of std since you can only use one number)
+net-scale-factor=0.0146
+offsets=122.77;116.75;104.094
+
+# 0:RGB 1:BGR
+model-color-format=0
+
+# Since different GPUs take different files, the appropriate folder name is added in the code
+model-engine-file=/workspaces/VideoIndexer-Nvidia-Live-PoC/models/owlv2/owlv2_image_encoder_patch16.engine
+
+# set how often the model should run inference on the input frames ( more relevant with tracker / should depend on camera frame rate).
+interval=0 # 1 every other frame
+gie-unique-id=1
+process-mode=1
+
+# 0=Detector, 1=Classifier, 2=Segmentation, 100=Other
+network-type=100
+# using FP16
+#network-mode=1
+# new tests
+##infer-dims=3;960;960
+# need to test the padding and aspect ratio
+#symmetric-padding=0
+maintain-aspect-ratio=0
+
+# trying multi
+#force-implicit-batch-dim=1
+batch-size=1
+
+# 0：Group Rectange 1：DBSCAN 2：NMS 3:DBSCAN+NMS 4:None
+cluster-mode=4
+output-tensor-meta=1
+
+[class-attrs-all]
+pre-cluster-threshold=0.25

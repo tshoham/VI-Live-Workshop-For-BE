@@ -1,0 +1,214 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "DS Example",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_example/deepstream_example.py",
+      "console": "integratedTerminal",
+      // "args": "-i data/cars.mp4 data/cars.mp4",
+      "args": "-i data/cars.mp4 --sink-type file --write-insights --raw-detections",
+      //"args": "-i file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.h264 --sink-type screen",
+      // "args": "-i data/cars.mp4 data/dashcam.mp4 --sink-type hls",
+      // "args": "-i data/cars.mp4 data/dashcam.mp4 --sink-type file --write-insights",
+      // "args": "-i https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/00001.07301.mp4?i=l39oh -o livecam.mp4",
+      //"args": "-i data/cars.mp4 data/dashcam.mp4 data/cars.mp4 data/dashcam.mp4",
+      // "args": "--display-type fake -i rtsp://127.0.0.1:3000/stream -o rtsp_deepstream_example_output.mp4",
+      //"args": "-i data/cars.mp4 --sink-type rtsp --file-loop",
+      // "args": "-i data/Video_of_Highway_Traffic.mp4 data/suitcase-one_shot-short_film.mp4 data/dashcam.mp4 data/Video_of_Highway_Traffic.mp4 --sink-type rtsp --file-loop",
+      // "args": "-i data/Cars_in_Highway_Traffic.mp4 data/suitcase-one_shot-short_film.mp4 data/dashcam.mp4 data/Video_of_Highway_Traffic.mp4 -o 4_vids_deepstream_example_output.mp4",
+      // "args": "-i data/cars.mp4 data/Cars_in_Highway_Traffic.mp4 --sink-type screen",
+      // "args": "-i rtsp://localhost:3010/ds-rtsp-input --sink-type screen",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        // "NVDS_ENABLE_LATENCY_MEASUREMENT": "1",  // Enable Pipeline Latency Measurement
+        // "NVDS_ENABLE_COMPONENT_LATENCY_MEASUREMENT": "1"  // Enable Component Latency Measurement
+      }
+    },
+    {
+      "name": "DS YOLO-X Large Custom Model",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_yolo_x_l_custom/deepstream_yolo_x_l_custom.py",
+      "console": "integratedTerminal",
+      "args": "data/cars.h264",
+      // "args": "data/dashcam.h264",
+      // "args": "data/Friends_Steady_Hand.h264",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        // "USE_NEW_NVSTREAMMUX": "yes"
+      }
+    },
+    {
+      "name": "OwlV2 Detection",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_owlv2_custom/deepstream_owlv2_detector.py",
+      "console": "integratedTerminal",
+      //"args": ["--input", "data/cars.h264","--prompt","[a car, a person]","--color_info","[car]", "--threshold","0.1"],
+      // "args": ["--input", "data/cars.h264", "--prompt", "[a car, a person]", "--threshold", "0.1"],
+      "args": ["--input", "data/cars_2_sec.mp4", "--prompt", "[a car, a person]", "--threshold", "0.1"],
+      // "args": ["--input", "data/Friends_Steady_Hand.h264", "--prompt","[a shirt, a person, a couch]","--color_info","[shirt]", "--threshold","0.1"],
+      // "args": ["--input", "data/suitcase-one_shot-short_film.264", ,"--prompt","[a person, a suitcase, a cellphone]","--color_info","[suitcase]", "--threshold","0.1"],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        // "USE_NEW_NVSTREAMMUX": "yes"
+      }
+    },
+    {
+      "name": "OwlV2 Tracking",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_owlv2_custom/deepstream_owlv2_tracker.py",
+      "console": "integratedTerminal",
+      // "args": "-i data/cars.mp4",
+      // "args": "-i data/cars_2_sec.mp4",
+      "args": ["--silent", "--input", "data/cars_2_sec.mp4", "--prompt", "[a person]", "--threshold", "0.2"],
+      // "args": ["--silent", "--input", "data/cars.mp4", "--prompt", "[a person]", "--threshold", "0.2"],
+      //"args": ["-i", "data/Nashville_police.mp4", "--prompt", "[a person, a gun]"],
+      //"args": ["-i", "data/cars.mp4", "--prompt", "[a person, a car]"],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+      }
+    },
+    {
+      "name": "Python Owlv2",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/nanoowl-fewshot/examples",
+      "program": "owl_predict.py",
+      "console": "integratedTerminal",
+      "args": "--image ../assets/owl_glove.jpg --prompt \"[a photo of an owl,a photo of a glove]\" --output ../data/owl_glove_obj.jpg",
+      // "args": "data/dashcam.h264",
+      // "args": "data/Friends_Steady_Hand.h264",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/nanoowl-fewshot",
+        // "USE_NEW_NVSTREAMMUX": "yes"
+      }
+    },
+      {
+        "name": "Python Safety ",
+        "type": "debugpy",
+        "request": "launch",
+        "cwd": "${workspaceFolder}/nanoowl-fewshot/examples",
+        "program": "safety_person_detection.py",
+        "console": "integratedTerminal",
+        "args": ["--image",
+          //"/data/live_VLM/Helmets/helmets_dataset/helmet_dataset/JPEGImages/",
+          "/data/weapons/weapons-in-images-DatasetNinja_small/test-cctv/img/",
+          "--output",
+          //"/data/live_VLM/Helmets/output/protective2",
+          "/data/weapons/owl2_v2_results/cctv_results2",
+          "--prompt",
+          "[person, handgun,rifle]",
+          "--threshold",
+          "0.2,0.1,0.1",
+        ],
+        // "args": "data/dashcam.h264",
+        // "args": "data/Friends_Steady_Hand.h264",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/nanoowl-fewshot",
+          // "USE_NEW_NVSTREAMMUX": "yes"
+        }
+      },
+    {
+      "name": "DS Test 1",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_test1/deepstream_test_1.py",
+      "console": "integratedTerminal",
+      "args": "data/cars.h264",
+      // "args": "data/dashcam.h264",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        // "USE_NEW_NVSTREAMMUX": "yes"
+      }
+    },
+    {
+      "name": "DS Test 2",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_test2/deepstream_test_2.py",
+      "console": "integratedTerminal",
+      "args": "data/cars.h264",
+      // "args": "data/dashcam.h264",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+      }
+    },
+    {
+      "name": "DS Test 1 RTSP Out",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_test1_rtsp_out/deepstream_test1_rtsp_out.py",
+      "console": "integratedTerminal",
+      // "args": "-i data/cars.h264",
+      "args": "-i data/dashcam.h264",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+      }
+    },
+    {
+      "name": "RTSP Serving",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/rtsp_serving/gst_rtsp_server.py",
+      "console": "integratedTerminal",
+      "args": "--video-path data/dashcam.mp4",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+      }
+    },
+    {
+      "name": "DS Display Type - HLSSink2",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/display_examples/hlssink2.py",
+      "console": "integratedTerminal",
+      "args": "data/dashcam.h264",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+      }
+    },
+    {
+      "name": "DS Display Type - HLSSink Loop",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/deepstream_example/deepstream_example.py",
+      "console": "integratedTerminal",
+      "args": "-i data/cars.mp4 data/dashcam.mp4 --output-path hlssink --sink-type hls --file-loop",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+      }
+    },
+    {
+      "name": "Evaluation",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/dev",
+      "program": "evaluate.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python Debugger: Current File (External Terminal)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "externalTerminal"
+    }
+  ]
+}

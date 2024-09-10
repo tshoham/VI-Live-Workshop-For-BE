@@ -1,0 +1,28 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+    "name": "DeepStream Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "../"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+				"ms-python.python",
+				"ms-toolsai.jupyter",
+				"github.copilot",
+				"GitHub.copilot-chat"
+			]
+        }
+    },
+    "postStartCommand": "/usr/bin/bash ./.devcontainer/bootstrap.sh",
+    "runArgs": ["--gpus", "all", "--network", "host"],
+    "containerEnv": {
+		"DUMMY_ENV_VAR": "hello world"
+	},
+    "mounts": [
+        "source=c:/Users/talshoham/code/VI-Live-Workshop-For-BE/data,target=/data,type=bind,consistency=cached"       
+    ]
+    // "forwardPorts": [3000] // not needed when running the docker with `--network host`
+}
