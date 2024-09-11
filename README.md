@@ -19,9 +19,11 @@ Connect to AzVpn
 
 ### Steps
 
+We will use [ts-gpu-deepstream](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/24237b72-8546-4da5-b204-8c3cb76dd930/resourceGroups/yl-try-rg/providers/Microsoft.Compute/virtualMachines/ts-gpu-deepstream/overview)
+
 #### Setting up key and verifying connection to the VM
 
-1. Go Help -> Reset password and "Add SSH public key
+1. In the Go Help -> Reset password and "Add SSH public key
    - Username: it will be easier to use the username azureuser in the existing vms. If creating a new oser/on a new vm, you will need to add rbac to the user (in the comments below)
    - Type: Ed25519
 
@@ -42,7 +44,7 @@ Connect to AzVpn
       ```
 
 4. Choose linux os
-5. Choose "Open folder" choose path to "VideoIndexer-Nvidia-Live-PoC"
+5. Choose "Open folder" choose path to "VI-Live-Workshop-For-BE"
 
 #### Connecting to Dev Container within the VM
 
@@ -51,4 +53,3 @@ Connect to AzVpn
  
 > [!TIP]
 > If you use a different/new user when creating the key run ```sudo usermod -a -G docker azureuser```. By adding a user to the docker group, you allow this user to run Docker commands without needing to use sudo each time.
-

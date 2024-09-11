@@ -285,7 +285,7 @@ def main(args):
     # Use convertor to convert from NV12 to RGBA as required by nvosd
     nvvidconv = create_element("nvvideoconvert", "convertor")
 
-    # Create OSD (on screen display") to draw on the converted RGBA buffer
+    # Create OSD (on screen display) to draw on the converted RGBA buffer
     nvosd = create_element("nvdsosd", "onscreendisplay")
 
     ## sink
@@ -324,123 +324,26 @@ def main(args):
     # endregion Gstream Elements
 
     # region Add Elements To Pipeline
-
-    # Simple Pipeline with 4-class-detecor and file sink
-    # # print("Adding elements to Pipeline dstest1 \n")
-    # # pipeline.add(file_source)
-    # # pipeline.add(h264parser)
-    # # pipeline.add(decoder)
-    # # pipeline.add(streammux)
-    # # pipeline.add(pgie)
-    # # pipeline.add(nvvidconv)
-    # # pipeline.add(nvosd)
-    # # pipeline.add(file_sink)
     
-    # Pipeline with 4-class-detecor, tracker, vehicle make and type classifiers and file sink
-    print("Adding elements to Pipeline dstest2 \n")
-    pipeline.add(file_source)
-    pipeline.add(h264parser)
-    pipeline.add(decoder)
-    pipeline.add(streammux)
-    pipeline.add(pgie)
-    pipeline.add(tracker)
-    pipeline.add(sgie1)
-    pipeline.add(sgie2)
-    pipeline.add(nvvidconv)
-    pipeline.add(nvosd)
-    pipeline.add(file_sink)
+    """ Add the elements to the pipeline here """
     
-    # Simple Pipeline with 4-class-detecor and rtsp sink
-    # # print("Adding elements to Pipeline dstest1 with rtsp out \n")
-    # # pipeline.add(file_source)
-    # # pipeline.add(h264parser)
-    # # pipeline.add(decoder)
-    # # pipeline.add(streammux)
-    # # pipeline.add(pgie)
-    # # pipeline.add(nvvidconv)
-    # # pipeline.add(nvosd)
-    # # pipeline.add(nvvidconv_postosd)
-    # # pipeline.add(caps)
-    # # pipeline.add(encoder)
-    # # pipeline.add(rtppay)
-    # # pipeline.add(rtsp_sink)
-    
-    # Pipeline with 4-class-detecor, tracker, vehicle make and type classifiers and rtsp sink
-    # # print("Adding elements to Pipeline dstest2 \n")
-    # # pipeline.add(file_source)
-    # # pipeline.add(h264parser)
-    # # pipeline.add(decoder)
-    # # pipeline.add(streammux)
-    # # pipeline.add(pgie)
-    # # pipeline.add(tracker)
-    # # pipeline.add(sgie1)
-    # # pipeline.add(sgie2)
-    # # pipeline.add(nvvidconv)
-    # # pipeline.add(nvosd)
-    # # pipeline.add(nvvidconv_postosd)
-    # # pipeline.add(caps)
-    # # pipeline.add(encoder)
-    # # pipeline.add(rtppay)
-    # # pipeline.add(rtsp_sink)
-
     # endregion Add Elements To Pipeline
     
     # region Link Elements In Pipeline
     
     # Link the elements together
-    # test 1: file-source -> h264-parser -> nvh264-decoder -> pgie -> nvvidconv -> nvosd -> video-renderer
+    # test 1: file-source -> h264-parser -> nvh264-decoder -> streamux -> pgie -> nvvidconv -> nvosd -> video-renderer
     
     # test 2: same as 1 with rtsp out
-    # file-source -> h264-parser -> nvh264-decoder -> pgie -> nvvidconv -> nvosd -> nvvidconv_postosd -> caps -> encoder -> rtppay -> udpsink
+    # file-source -> h264-parser -> nvh264-decoder -> streamux -> pgie -> nvvidconv -> nvosd -> nvvidconv_postosd -> caps -> encoder -> rtppay -> udpsink
 
-    # test 3: file-source -> h264-parser -> nvh264-decoder -> pgie -> tracker -> sgie1 -> sgie2 -> nvvidconv -> nvosd -> video-renderer
+    # test 3: file-source -> h264-parser -> nvh264-decoder -> streamux -> pgie -> tracker -> sgie1 -> sgie2 -> nvvidconv -> nvosd -> video-renderer
     
     # test 4: same as 3 with rtsp out
-    # file-source -> h264-parser -> nvh264-decoder -> pgie -> tracker -> sgie1 -> sgie2 -> nvvidconv -> nvosd -> nvvidconv_postosd -> caps -> encoder -> rtppay -> udpsink
+    # file-source -> h264-parser -> nvh264-decoder -> streamux -> pgie -> tracker -> sgie1 -> sgie2 -> nvvidconv -> nvosd -> nvvidconv_postosd -> caps -> encoder -> rtppay -> udpsink
 
-    print("Linking elements in the Pipeline\n")
+    """ Link the elements together here """
     
-    # linking source to h264parser to decoder (No need to edit)
-    file_source.link(h264parser)
-    h264parser.link(decoder)
-
-    # linking decoder to streammux (No need to edit)
-    sinkpad = streammux.request_pad_simple("sink_0")
-    if not sinkpad:
-        sys.stderr.write("Unable to get the sink pad of streammux\n")
-    srcpad = decoder.get_static_pad("src")
-    if not srcpad:
-        sys.stderr.write("Unable to get source pad of decoder\n")
-    srcpad.link(sinkpad)
-    
-    # linking streamux to pgie/tracker/sgie to video converter 
-    # (tests 1 + 2)
-    # # streammux.link(pgie)
-    # # pgie.link(nvvidconv)
-    
-    # (tests 3 + 4)
-    streammux.link(pgie)
-    pgie.link(tracker)
-    tracker.link(sgie1)
-    sgie1.link(sgie2)
-    sgie2.link(nvvidconv)
-    
-    
-    # link converter to on screen display ( no need to edit)
-    nvvidconv.link(nvosd)
-    
-    # # link sink - to file or to rtsp
-    
-    # link osd to sink (tests 1 + 3)
-    nvosd.link(file_sink)
-    
-    # link osd with rtsp out (tests 2 + 4)
-    # # nvosd.link(nvvidconv_postosd)
-    # # nvvidconv_postosd.link(caps)
-    # # caps.link(encoder)
-    # # encoder.link(rtppay)
-    # # rtppay.link(rtsp_sink)
-
     # endregion Link Elements In Pipeline
 
     # Create an event loop and feed gstreamer bus messages to it
@@ -451,18 +354,18 @@ def main(args):
     
     # region Rtsp Out
     # Start streaming (If running rtsp out) - if running rtsp tests (2 or 4) then uncomment this region
-    rtsp_port_num = 8554
+    # # rtsp_port_num = 8554
     
-    server = GstRtspServer.RTSPServer.new()
-    server.props.service = "%d" % rtsp_port_num
-    server.attach(None)
+    # # server = GstRtspServer.RTSPServer.new()
+    # # server.props.service = "%d" % rtsp_port_num
+    # # server.attach(None)
     
-    factory = GstRtspServer.RTSPMediaFactory.new()
-    factory.set_launch( "( udpsrc name=pay0 port=%d buffer-size=524288 caps=\"application/x-rtp, media=video, clock-rate=90000, encoding-name=(string)%s, payload=96 \" )" % (updsink_port_num, "H264"))
-    factory.set_shared(True)
-    server.get_mount_points().add_factory("/ds-test", factory)
+    # # factory = GstRtspServer.RTSPMediaFactory.new()
+    # # factory.set_launch( "( udpsrc name=pay0 port=%d buffer-size=524288 caps=\"application/x-rtp, media=video, clock-rate=90000, encoding-name=(string)%s, payload=96 \" )" % (updsink_port_num, "H264"))
+    # # factory.set_shared(True)
+    # # server.get_mount_points().add_factory("/ds-test", factory)
     
-    print("\n *** DeepStream: Launched RTSP Streaming at rtsp://localhost:%d/ds-test ***\n\n" % rtsp_port_num)
+    # # print("\n *** DeepStream: Launched RTSP Streaming at rtsp://localhost:%d/ds-test ***\n\n" % rtsp_port_num)
     # endregion Rtsp Out
 
     add_probe(nvosd)
