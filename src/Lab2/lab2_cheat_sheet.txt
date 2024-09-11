@@ -1,0 +1,28 @@
+1:
+def create_and_link_sources(src_config: SrcConfig, number_sources, streammux, pipeline):
+    for i in range(number_sources):
+        print(f"Creating source_bin {i}\n")
+                
+        source_bin = create_source_bin(src_config, i)
+        verify_component(source_bin, "Source bin")
+
+        pipeline.add(source_bin)
+        padname = "sink_%u" % i
+        sinkpad = streammux.request_pad_simple(padname)
+        verify_component(sinkpad, "Streammux sink pad")
+
+        srcpad = source_bin.get_static_pad("src")
+        verify_component(srcpad, "Source bin src pad")
+
+        srcpad.link(sinkpad)
+
+2: 
+    # # Batching for multiple camera inputs for streamux and pgie
+    streammux.set_property("batch-size", number_sources)
+    
+    print("Adding batch size to pgie according to number of sources\n")
+    pgie_batch_size = pgie.get_property("batch-size")
+    if pgie_batch_size != number_sources:
+        print(f"WARNING: Overriding infer-config batch-size {pgie_batch_size} with {number_sources=}\n")
+        pgie.set_property("batch-size", number_sources)
+        

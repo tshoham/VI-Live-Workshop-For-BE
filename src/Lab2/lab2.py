@@ -1,3 +1,4 @@
+# region Imports
 import argparse
 from collections import Counter
 import configparser
@@ -20,7 +21,9 @@ from src.common.utils import check_and_normalize_inputs, get_file_name_no_ext, g
 from src.common.gst_utils import create_element, create_sink, create_source_bin, get_tracker, SinkConfig, SrcConfig, \
     verify_component
 from src.common.insights_utils import FrameData, BBoxData, read_tracker_config, write_insights_on_cleanup, generate_buffer_main_key
+# endregion Imports
 
+# region Consts+Paths
 PGIE_CONFIG_PATH = str(DEEPSTREAM_CONFIGS_DIR / "dstest3_pgie_config.txt")
 assert os.path.exists(PGIE_CONFIG_PATH), f"File {PGIE_CONFIG_PATH} does not exist"
 
@@ -43,6 +46,8 @@ TILED_OUTPUT_HEIGHT = 720
 OSD_PROCESS_MODE = 0  # 0: CPU mode, 1: GPU mode (https://docs.nvidia.com/metropolis/deepstream/dev-guide/text/DS_plugin_gst-nvdsosd.html)
 OSD_DISPLAY_TEXT = 1
 OSD_DISPLAY_CLOCK = 1
+
+# endregion Consts+Paths
 
 def get_metadata_from_buffer(batch_meta, u_data, show_display=False, timestamp_type=None):
     global insights_data
@@ -195,6 +200,11 @@ def create_elements(pipeline, sink_config: SinkConfig):
     tiler = create_element("nvmultistreamtiler", "nvtiler", pipeline)
     tiler.set_property("width", TILED_OUTPUT_WIDTH)
     tiler.set_property("height", TILED_OUTPUT_HEIGHT)
+    # Tiler properties for output display accoring to number of inputs
+    tiler_rows = int(math.sqrt(number_sources))
+    tiler_columns = int(math.ceil((1.0 * number_sources) / tiler_rows))
+    tiler.set_property("rows", tiler_rows)
+    tiler.set_property("columns", tiler_columns)
     
     nvvidconv = create_element("nvvideoconvert", "convertor", pipeline)
     nvosd = create_element("nvdsosd", "onscreendisplay", pipeline)
@@ -208,22 +218,7 @@ def create_elements(pipeline, sink_config: SinkConfig):
     return streammux, queue1, queue2, queue3, queue4, queue5, queue6, pgie, tracker, tiler, nvvidconv, nvosd, sink
 
 def create_and_link_sources(src_config: SrcConfig, number_sources, streammux, pipeline):
-    for i in range(number_sources):
-        print(f"Creating source_bin {i}\n")
-        uri_name = src_config.input_uris[i]
-        
-        source_bin = create_source_bin(src_config, i)
-        verify_component(source_bin, "Source bin")
-
-        pipeline.add(source_bin)
-        padname = "sink_%u" % i
-        sinkpad = streammux.request_pad_simple(padname)
-        verify_component(sinkpad, "Streammux sink pad")
-
-        srcpad = source_bin.get_static_pad("src")
-        verify_component(srcpad, "Source bin src pad")
-
-        srcpad.link(sinkpad)
+    """ Your implementation goes here for creating and linking sources """
 
 def main(src_config: SrcConfig, sink_config: SinkConfig,
          write_insights=False):
@@ -235,35 +230,20 @@ def main(src_config: SrcConfig, sink_config: SinkConfig,
 
     global perf_data
     perf_data = PERF_DATA(len(src_config.input_uris))
-
+    print("Creating Pipeline\n")
+    pipeline = Gst.Pipeline()
+    verify_component(pipeline, "Pipeline")
+    
     number_sources = len(src_config.input_uris)
 
-    platform_info = PlatformInfo()
     # Standard GStreamer initialization
     Gst.init(None)
 
     # Create gstreamer elements
-    # Create Pipeline element that will form a connection of other elements
-    print("Creating Pipeline\n")
-    pipeline = Gst.Pipeline()
-    verify_component(pipeline, "Pipeline")
-
+    # Create Pipeline elements that will form a connection of other elements
     streammux, queue1, queue2, queue3, queue4, queue5, queue6, pgie, tracker, tiler, nvvidconv, nvosd, sink = create_elements(pipeline, sink_config)
 
-    # # Batching for multiple camera inputs for streamux and pgie
-    streammux.set_property("batch-size", number_sources)
-    
-    print("Adding batch size to pgie according to number of sources\n")
-    pgie_batch_size = pgie.get_property("batch-size")
-    if pgie_batch_size != number_sources:
-        print(f"WARNING: Overriding infer-config batch-size {pgie_batch_size} with {number_sources=}\n")
-        pgie.set_property("batch-size", number_sources)
-        
-    # Tiler properties for output display accoring to number of inputs
-    tiler_rows = int(math.sqrt(number_sources))
-    tiler_columns = int(math.ceil((1.0 * number_sources) / tiler_rows))
-    tiler.set_property("rows", tiler_rows)
-    tiler.set_property("columns", tiler_columns)
+    """  Your implementation goes here for setting batch-size properties """
 
     create_and_link_sources(src_config, number_sources, streammux, pipeline)
 

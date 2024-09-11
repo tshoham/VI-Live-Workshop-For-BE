@@ -6,7 +6,7 @@ This means that our video pipelines need to be easily adjustable.
 We mentioned that GStreamer's benefits consist of "Modular Architecture", and we will see here how this allows to create custom pipelines using various plugins (both gstreamer and deepstream plugins).
 
 ## Purpose
-lab.py is a sample that consists of 4 different pipeline options.
+lab1.py is a sample that consists of 4 different pipeline options.
 We will go over all of the code very briefly and focus on the pipeline creation and element linking. 
 
 > [!NOTE]
@@ -19,7 +19,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 > H264 is the input of lab1 pipeline.
 > The file will go through a parser that will parse the stream, and a decoder that will decode the stream into raw video frames for further processing
 
-## Instructions:
+## Instructions
 
 ### Pipeline 1: Simple Detector Pipeline
 
@@ -68,8 +68,8 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 > decoder will be linked to the streammux as follows:
 > ```
 > srcpad = decoder.get_static_pad("src")
->    sinkpad = streammux.request_pad_simple("sink_0")
->    srcpad.link(sinkpad)
+> sinkpad = streammux.request_pad_simple("sink_0")
+> srcpad.link(sinkpad)
 > ```
 
 3. Open the folder in dev container and run Lab 1.
