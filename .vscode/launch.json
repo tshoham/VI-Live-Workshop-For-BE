@@ -18,6 +18,18 @@
       }
     },
     {
+      "name": "Lab 2",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "src/Lab2/lab2.py",
+      "console": "integratedTerminal",
+      "args": "-i data/cars.mp4 data/dashcam.mp4 data/dashcam.mp4 data/cars.mp4 --write-insights",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+      }
+    },
+    {
       "name": "DS Example",
       "type": "debugpy",
       "request": "launch",

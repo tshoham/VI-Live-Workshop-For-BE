@@ -225,29 +225,11 @@ def add_probe(nvosd):
         sys.stderr.write("Unable to get sink pad of nvosd\n")
     osdsinkpad.add_probe(Gst.PadProbeType.BUFFER, osd_sink_pad_buffer_probe, 0)
 
-def main(args):
-    # Check input arguments
-    if len(args) != 2:
-        sys.stderr.write("usage: %s <media file or uri>\n" % args[0])
-        sys.exit(1)
-
-    # region Gstream Elements
-    
-    # Create Pipeline element that will form a connection of other elements
-    # Standard GStreamer initialization
-    Gst.init(None)
-    
-    print("Creating Pipeline\n")
-    pipeline = Gst.Pipeline()
-
-    if not pipeline:
-        sys.stderr.write("Unable to create Pipeline\n")
-
-    ## sources
+def create_pipeline_elements(args):
+        ## sources
     # file_source element for reading from the file
     file_source = create_element("filesrc", "file-source")
     file_source.set_property("location", args[1])
-
     ## Parser
     # Since the data format in the input file is elementary h264 stream, we need a h264parser
     h264parser = create_element("h264parse", "h264-parser")
@@ -320,6 +302,29 @@ def main(args):
     rtsp_sink.set_property('port', updsink_port_num)
     rtsp_sink.set_property('async', False)
     rtsp_sink.set_property('sync', 1)
+
+    return file_source, h264parser, decoder, streammux, pgie, tracker, sgie1, sgie2, nvvidconv, nvosd, file_sink, nvvidconv_postosd, caps, encoder, rtppay, rtsp_sink
+
+def main(args):
+    # Check input arguments
+    if len(args) != 2:
+        sys.stderr.write("usage: %s <media file or uri>\n" % args[0])
+        sys.exit(1)
+
+    # region Gstream Elements
+    
+    # Create Pipeline element that will form a connection of other elements
+    # Standard GStreamer initialization
+    Gst.init(None)
+    
+    print("Creating Pipeline\n")
+    pipeline = Gst.Pipeline()
+
+    if not pipeline:
+        sys.stderr.write("Unable to create Pipeline\n")
+
+    file_source, h264parser, decoder, streammux, pgie, tracker, sgie1, sgie2, nvvidconv,\
+        nvosd, file_sink, nvvidconv_postosd, caps, encoder, rtppay, rtsp_sink = create_pipeline_elements(args)
     
     # endregion Gstream Elements
 

@@ -74,6 +74,11 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 
 3. Open the folder in dev container and run Lab 1.
 4. Look at the results and the detections.
+ 
+> [!IMPORTANT]
+> Copy the output file to you local machine to view the video.
+>
+> ```scp azureuser@40.124.109.198:~/VideoIndexer-Nvidia-Live-PoC/outputs/<file_name> <local_path>```
 
 > [!NOTE]
 > Notice at the tope left corner there is printed metadata We added this metadata to the "nvosd" uing the "add_probe" function using ```osdsinkpad.add_probe(Gst.PadProbeType.BUFFER, osd_sink_pad_buffer_probe, 0)```. We can preform in place modifications on the metadata.
@@ -84,7 +89,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 
     1. **tracker**
     2. **sgie1** - this is a car make classifier
-    3. ***sgie2*** - this is a car type classifier
+    3. **sgie2** - this is a car type classifier
 
     After that the pipeline will continue to the converter, osd, and sink as in the previous example.
     **Add** these 3 elements to the pipeline
@@ -95,7 +100,15 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 
 ### Pipeline 3: Simple Detector Pipeline With RTSP Outpus
 
-1. In this example we will run the same AI inference as the first example. Here we will output to rtsp instead of a file (no need for file_sink). After the **nvosd** we will add tje following elements to the pipeline:
+> [!IMPORTANT]
+> To view the rtsp output open your vlc player in you local machine
+> Click on ```Media``` then ```Open Network Stream```. Past the following URL: ```rtsp://40.124.109.198:554/ds-test```
+> Dont click Play yet! 
+>
+> Have this ready before running the Lab in the VM. Once you run the Lab, wait until you see that the frames are being processd, and the click Play. 
+> This may fail once before connecting successfully.
+
+1. In this example we will run the same AI inference as the first example. Here we will output to rtsp instead of a file (no need for file_sink). After the **nvosd** we will add the following elements to the pipeline:
 
     1. **nvvidconv_postosd**
     2. **caps**

@@ -1,27 +1,3 @@
-#!/usr/bin/env python3
-
-"""
-Comments:
-* The code uses `uridecodebin` so that any type of input (e.g. RTSP/File), any GStreamer  supported container format,
-  and any codec can be used as input.
-* Configure the stream-muxer to generate a batch of frames and infer on the batch for better resource utilization.
-* Extract the stream metadata, which contains useful information about the frames in the batched buffer.
-* Showcases how to enable latency measurement using probe function.
-
-This sample accepts one or more H.264/H.265 video streams as input. It creates
-a source bin for each input and connects the bins to an instance of the
-"nvstreammux" element, which forms the batch of frames. The batch of
-frames is fed to "nvinfer" for batched inferencing. The batched buffer is
-composited into a 2D tile array using "nvmultistreamtiler."
-
-ODS - On Screen Display. `nvosd` refers to a GStreamer element provided by NVIDIA DeepStream SDK, used for
-On-Screen Display (OSD). It is designed to draw bounding boxes, labels, and other visual overlays on video frames.
-These overlays are typically used to display metadata or results from video analytics, such as object detection,
-classification, and tracking. The nvosd element takes input frames (usually in RGBA format) and overlays graphical
-information on these frames before passing them to the next element in the GStreamer pipeline, which could be for
-display or encoding and saving.
-"""
-
 import argparse
 from collections import Counter
 import configparser
@@ -68,33 +44,6 @@ OSD_PROCESS_MODE = 0  # 0: CPU mode, 1: GPU mode (https://docs.nvidia.com/metrop
 OSD_DISPLAY_TEXT = 1
 OSD_DISPLAY_CLOCK = 1
 
-
-def load_labels(labels_file):
-    with open(labels_file) as f:
-        return [line.strip() for line in f.readlines()]
-
-
-def get_labels_from_config_file(config_file_path: str) -> list:
-    config = configparser.ConfigParser()
-    config.read(config_file_path)
-    config.sections()
-
-    labels_file = None
-    for key in config["property"]:
-        if key == "labelfile-path":
-            labels_file = config.get("property", key)
-            if not os.path.exists(labels_file):
-                raise FileNotFoundError(f"File {labels_file} does not exist")
-
-            return load_labels(labels_file)
-
-    return None
-
-
-LABELS = get_labels_from_config_file(PGIE_CONFIG_PATH)
-print(f"Labels file: {LABELS}")
-
-
 def get_metadata_from_buffer(batch_meta, u_data, show_display=False, timestamp_type=None):
     global insights_data
     global stream_metadata
@@ -137,17 +86,6 @@ def get_metadata_from_buffer(batch_meta, u_data, show_display=False, timestamp_t
         if not silent:
             text_display = f"Stream={stream_name} Frame={frame_number} #Objects={num_rects}"
             print(text_display)
-
-        # # switch-case for the timestamp type
-        # match timestamp_type:
-        #     case "buf_pts":
-        #         timestamp = frame_meta.buf_pts
-        #     case "ntp_timestamp":
-        #         timestamp = frame_meta.ntp_timestamp
-        #     case "misc_frame_info":
-        #         timestamp = frame_meta.misc_frame_info
-        #     case _:
-        #         timestamp = None
 
         obj_counter = Counter()
 
@@ -202,7 +140,6 @@ def get_metadata_from_buffer(batch_meta, u_data, show_display=False, timestamp_t
         except StopIteration:
             break
 
-
 def tracker_src_pad_buffer_probe(pad, info, u_data):
     gst_buffer = info.get_buffer()
     if not gst_buffer:
@@ -222,7 +159,6 @@ def tracker_src_pad_buffer_probe(pad, info, u_data):
 
     return Gst.PadProbeReturn.OK
 
-
 def start_rtsp_streaming(sink_config: SinkConfig):
     server = GstRtspServer.RTSPServer.new()
     server.props.service = str(sink_config.rtsp_port)
@@ -235,8 +171,61 @@ def start_rtsp_streaming(sink_config: SinkConfig):
 
     print(f"\n *** DeepStream: Launched RTSP Streaming at rtsp://localhost:{sink_config.rtsp_port}/{sink_config.mount_point} ***\n\n")
 
+def create_elements(pipeline, sink_config: SinkConfig):
+    # Create nvstreammux instance to form batches from one or more sources
+    streammux = create_element("nvstreammux", "Stream-muxer", pipeline)
+    streammux.set_property("width", 1920)
+    streammux.set_property("height", 1080)
+    streammux.set_property("batched-push-timeout", MUXER_BATCH_TIMEOUT_USEC)
+    
+    queue1 = create_element("queue", "queue1", pipeline)
+    queue2 = create_element("queue", "queue2", pipeline)
+    queue3 = create_element("queue", "queue3", pipeline)
+    queue4 = create_element("queue", "queue4", pipeline)
+    queue5 = create_element("queue", "queue5", pipeline)
+    queue6 = create_element("queue", "queue6", pipeline)
 
-def main(src_config: SrcConfig, sink_config: SinkConfig, requested_pgie=None, config=None, disable_probe=False,
+    print("Creating pgie\n")
+    pgie = create_element("nvinfer", "primary-inference", pipeline)
+    pgie.set_property("config-file-path", PGIE_CONFIG_PATH)
+
+    tracker = get_tracker(ds_configs_dir=DEEPSTREAM_CONFIGS_DIR, tracker_config_file=TRACKER_CONFIG_FILE,
+                          container=pipeline)
+
+    tiler = create_element("nvmultistreamtiler", "nvtiler", pipeline)
+    tiler.set_property("width", TILED_OUTPUT_WIDTH)
+    tiler.set_property("height", TILED_OUTPUT_HEIGHT)
+    
+    nvvidconv = create_element("nvvideoconvert", "convertor", pipeline)
+    nvosd = create_element("nvdsosd", "onscreendisplay", pipeline)
+
+    nvosd.set_property("process-mode", OSD_PROCESS_MODE)
+    nvosd.set_property("display-text", OSD_DISPLAY_TEXT)
+    nvosd.set_property("display-clock", OSD_DISPLAY_CLOCK)
+
+    sink = create_sink(sink_config, pipeline)
+
+    return streammux, queue1, queue2, queue3, queue4, queue5, queue6, pgie, tracker, tiler, nvvidconv, nvosd, sink
+
+def create_and_link_sources(src_config: SrcConfig, number_sources, streammux, pipeline):
+    for i in range(number_sources):
+        print(f"Creating source_bin {i}\n")
+        uri_name = src_config.input_uris[i]
+        
+        source_bin = create_source_bin(src_config, i)
+        verify_component(source_bin, "Source bin")
+
+        pipeline.add(source_bin)
+        padname = "sink_%u" % i
+        sinkpad = streammux.request_pad_simple(padname)
+        verify_component(sinkpad, "Streammux sink pad")
+
+        srcpad = source_bin.get_static_pad("src")
+        verify_component(srcpad, "Source bin src pad")
+
+        srcpad.link(sinkpad)
+
+def main(src_config: SrcConfig, sink_config: SinkConfig,
          write_insights=False):
     global insights_data
 
@@ -259,93 +248,24 @@ def main(src_config: SrcConfig, sink_config: SinkConfig, requested_pgie=None, co
     pipeline = Gst.Pipeline()
     verify_component(pipeline, "Pipeline")
 
-    # Create nvstreammux instance to form batches from one or more sources
-    streammux = create_element("nvstreammux", "Stream-muxer", pipeline)
+    streammux, queue1, queue2, queue3, queue4, queue5, queue6, pgie, tracker, tiler, nvvidconv, nvosd, sink = create_elements(pipeline, sink_config)
 
-    is_live = False
-    for i in range(number_sources):
-        print(f"Creating source_bin {i}\n")
-        uri_name = src_config.input_uris[i]
-        if uri_name.find("rtsp://") == 0:
-            is_live = True
-
-        source_bin = create_source_bin(src_config, i)
-        verify_component(source_bin, "Source bin")
-
-        pipeline.add(source_bin)
-        padname = "sink_%u" % i
-        sinkpad = streammux.request_pad_simple(padname)
-        verify_component(sinkpad, "Streammux sink pad")
-
-        srcpad = source_bin.get_static_pad("src")
-        verify_component(srcpad, "Source bin src pad")
-
-        srcpad.link(sinkpad)
-
-    queue1 = create_element("queue", "queue1", pipeline)
-    queue2 = create_element("queue", "queue2", pipeline)
-    queue3 = create_element("queue", "queue3", pipeline)
-    queue4 = create_element("queue", "queue4", pipeline)
-    queue5 = create_element("queue", "queue5", pipeline)
-    queue6 = create_element("queue", "queue6", pipeline)
-
-    print("Creating pgie\n")
-    if requested_pgie != None and (requested_pgie == "nvinferserver" or requested_pgie == "nvinferserver-grpc"):
-        pgie = create_element("nvinferserver", "primary-inference", pipeline)
-        # pgie = Gst.ElementFactory.make("nvinferserver", "primary-inference")
-    elif requested_pgie != None and requested_pgie == "nvinfer":
-        pgie = create_element("nvinfer", "primary-inference", pipeline)
-    else:
-        pgie = create_element("nvinfer", "primary-inference", pipeline)
-
-    tracker = get_tracker(ds_configs_dir=DEEPSTREAM_CONFIGS_DIR, tracker_config_file=TRACKER_CONFIG_FILE,
-                          container=pipeline)
-
-    nvdslogger = None
-    if disable_probe:
-        # Use nvdslogger for perf measurement instead of probe function
-        nvdslogger = create_element("nvdslogger", "nvdslogger", pipeline)
-
-    tiler = create_element("nvmultistreamtiler", "nvtiler", pipeline)
-    nvvidconv = create_element("nvvideoconvert", "convertor", pipeline)
-    nvosd = create_element("nvdsosd", "onscreendisplay", pipeline)
-
-    nvosd.set_property("process-mode", OSD_PROCESS_MODE)
-    nvosd.set_property("display-text", OSD_DISPLAY_TEXT)
-    nvosd.set_property("display-clock", OSD_DISPLAY_CLOCK)
-
-    if src_config.file_loop:
-        if platform_info.is_integrated_gpu():
-            # Set nvbuf-memory-type=4 for integrated gpu for file-loop (nvurisrcbin case)
-            streammux.set_property("nvbuf-memory-type", 4)
-        else:
-            # Set nvbuf-memory-type=2 for x86 for file-loop (nvurisrcbin case)
-            streammux.set_property("nvbuf-memory-type", 2)
-
-    sink = create_sink(sink_config, pipeline)
-
-    if is_live:
-        print("At least one of the sources is live")
-        streammux.set_property("live-source", 1)
-
-    streammux.set_property("width", 1920)
-    streammux.set_property("height", 1080)
+    # # Batching for multiple camera inputs for streamux and pgie
     streammux.set_property("batch-size", number_sources)
-    streammux.set_property("batched-push-timeout", MUXER_BATCH_TIMEOUT_USEC)
-
-    pgie.set_property("config-file-path", config or PGIE_CONFIG_PATH)
-
+    
+    print("Adding batch size to pgie according to number of sources\n")
     pgie_batch_size = pgie.get_property("batch-size")
     if pgie_batch_size != number_sources:
         print(f"WARNING: Overriding infer-config batch-size {pgie_batch_size} with {number_sources=}\n")
         pgie.set_property("batch-size", number_sources)
-
+        
+    # Tiler properties for output display accoring to number of inputs
     tiler_rows = int(math.sqrt(number_sources))
     tiler_columns = int(math.ceil((1.0 * number_sources) / tiler_rows))
     tiler.set_property("rows", tiler_rows)
     tiler.set_property("columns", tiler_columns)
-    tiler.set_property("width", TILED_OUTPUT_WIDTH)
-    tiler.set_property("height", TILED_OUTPUT_HEIGHT)
+
+    create_and_link_sources(src_config, number_sources, streammux, pipeline)
 
     print("Linking elements in the Pipeline\n")
     streammux.link(queue1)
@@ -353,12 +273,7 @@ def main(src_config: SrcConfig, sink_config: SinkConfig, requested_pgie=None, co
     pgie.link(queue2)
     queue2.link(tracker)
     tracker.link(queue3)
-
-    if nvdslogger:
-        queue3.link(nvdslogger)
-        nvdslogger.link(tiler)
-    else:
-        queue3.link(tiler)
+    queue3.link(tiler)
     tiler.link(queue4)
     queue4.link(nvvidconv)
     nvvidconv.link(queue5)
@@ -375,22 +290,11 @@ def main(src_config: SrcConfig, sink_config: SinkConfig, requested_pgie=None, co
     if sink_config.type == "rtsp":
         start_rtsp_streaming(sink_config)
 
-    if not disable_probe:
-        tracker_src_pad = tracker.get_static_pad("src")
-        verify_component(tracker_src_pad, "Tracker src pad")
-
-        tracker_src_pad.add_probe(Gst.PadProbeType.BUFFER, tracker_src_pad_buffer_probe, src_config)
-        # perf callback function to print fps every 5 sec
-        GLib.timeout_add(5000, perf_data.perf_print_callback)
-
-    # Enable latency measurement via probe if environment variable NVDS_ENABLE_LATENCY_MEASUREMENT=1 is set.
-    # To enable component level latency measurement, please set environment variable
-    # NVDS_ENABLE_COMPONENT_LATENCY_MEASUREMENT=1 in addition to the above.
-    if os.environ.get("NVDS_ENABLE_LATENCY_MEASUREMENT") == "1":
-        print("Pipeline Latency Measurement enabled!\nPlease set env var "
-              "NVDS_ENABLE_COMPONENT_LATENCY_MEASUREMENT=1 for Component Latency Measurement")
-        global measure_latency
-        measure_latency = True
+    tracker_src_pad = tracker.get_static_pad("src")
+    verify_component(tracker_src_pad, "Tracker src pad")
+    tracker_src_pad.add_probe(Gst.PadProbeType.BUFFER, tracker_src_pad_buffer_probe, src_config)
+    # perf callback function to print fps every 5 sec
+    GLib.timeout_add(5000, perf_data.perf_print_callback)
 
     # List the sources
     print("Now playing...")
@@ -421,10 +325,6 @@ def main(src_config: SrcConfig, sink_config: SinkConfig, requested_pgie=None, co
 def parse_args():
     parser = argparse.ArgumentParser(description="deepstream_example multistream, inference reference app")
     parser.add_argument("-i", "--input", help="Path to input streams", nargs="+", metavar="URIs", required=True)
-    parser.add_argument("-c", "--config-file", metavar="config_location.txt", default=None,
-                        help="Choose the config-file to be used with specified pgie")
-    parser.add_argument("-g", "--pgie", default=None, help="Choose Primary GPU Inference Engine",
-                        choices=["nvinfer","nvinferserver","nvinferserver-grpc"])
 
     # Section for sink type
     parser.add_argument("--sink-type", default="file", choices=SinkConfig.VALID_SINK_TYPES, help="Choose the sink type")
@@ -444,34 +344,18 @@ def parse_args():
 
     parser.add_argument("--write-insights", action="store_true", default=False, help="Write insights to a file")
 
-    parser.add_argument("--file-loop", action="store_true", default=False, help="Loop the input file sources after EOS")
     parser.add_argument("--memtype", type=int, choices=SrcConfig.VALID_CUDA_MEMORY_TYPES, default=-1,
                         help="Decoder CUDA memory type (-1: Do not set, 0: NVBUF_MEM_CUDA_DEVICE, 1: NVBUF_MEM_CUDA_PINNED, 2: NVBUF_MEM_CUDA_UNIFIED)")
     parser.add_argument("--raw-detections", action="store_true", default=False,
                         help="Enable raw detections debug (write raw detections to file)")
-
-    parser.add_argument("--disable-probe", action="store_true", default=False,
-                        help="Disable the probe function and use nvdslogger for FPS")
+    
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="Disable verbose output")
     args = parser.parse_args()
 
     args.input = check_and_normalize_inputs(args.input)
 
-    pgie = args.pgie
-    config = args.config_file
     global silent
     silent = args.silent
-
-    if config and not pgie or pgie and not config:
-        sys.stderr.write("\nEither pgie or configfile is missing. Please specify both! Exiting...\n\n\n\n")
-        parser.print_help()
-        sys.exit(1)
-
-    if config:
-        config_path = Path(config)
-        if not config_path.is_file():
-            sys.stderr.write("Specified config-file: %s doesn't exist. Exiting...\n\n" % config)
-            sys.exit(1)
 
     assert not (args.sink_type == "rtsp" and args.write_insights), "Cannot use RTSP when writing insights"
 
@@ -491,7 +375,7 @@ def parse_args():
 
     src_config = SrcConfig(
         input_uris=args.input,
-        file_loop=args.file_loop,
+        file_loop=False,
         memtype=args.memtype,
         raw_detections=args.raw_detections,
         )
@@ -508,9 +392,9 @@ def parse_args():
         )
 
     print(f"Arguments: {vars(args)}")
-    return src_config, sink_config, pgie, config, args.disable_probe, args.write_insights
+    return src_config, sink_config, args.write_insights
 
 
 if __name__ == "__main__":
-    src_config, sink_config, pgie, config, disable_probe, write_insights = parse_args()
-    sys.exit(main(src_config, sink_config, pgie, config, disable_probe, write_insights))
+    src_config, sink_config, write_insights = parse_args()
+    sys.exit(main(src_config, sink_config, write_insights))
