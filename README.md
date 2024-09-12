@@ -14,6 +14,7 @@ Connect to AzVpn
 
 [Workshop Setup](#Setup)
 - [Lab 1 - Creating 4 different pipelines](./src/Lab1)
+- [Lab 2 - Creating a pipeline with multiple inputs](./src/Lab2)
 
 ## Setup
 
@@ -23,33 +24,38 @@ We will use [ts-gpu-deepstream](https://ms.portal.azure.com/#@microsoft.onmicros
 
 #### Setting up key and verifying connection to the VM
 
-1. In the Go Help -> Reset password and "Add SSH public key
-   - Username: it will be easier to use the username azureuser in the existing vms. If creating a new oser/on a new vm, you will need to add rbac to the user (in the comments below)
-   - Type: Ed25519
-
-2. Download and save tje key under C:\Users\\\<username>\\\.ssh\\\<filename>
+1. In the Go Help -> Reset password and
+1. Choose "Add SSH public key"
+1. **Username**: azureuser
+1. **SSH public key source**: Generate new key pair
+1. **SSH Key Type**: Ed25519
+1. **Key Pair name**: ts-gpu-deepstream-key
+1. Click **Update**
+1. A window will popup allowing you to download the key.
+   
+    Download and save the key under C:\Users\\\<username>\\\.ssh\\\ts-gpu-deepstream-key
 
 #### Connecting to the VM from VSCode
 
-1. In VSCode, on the bottom left, click on the double arrow >< sign and choose "Connect to host"
-2. Paste your user@ip (for example azureuser@172.179.37.123)
-   - You can test your connection to the VM from bash/powershell
-
-3. Update config file with path to key:
+1. Connect to AzVpn
+1. In VSCode, on the bottom left, click on the blue double arrow >< sign
+![alt text](image.png)
+1. Click "Connect to host"
+1. Click on "Configure SSH Hosts" (choose the file that starts with "C:Users...")
+1. Update config file  and save with path to key:
       ```
-      Host 172.179.37.123
-         HostName 172.179.37.123
+      Host 40.124.109.198
+         HostName 40.124.109.198
          User azureuser
-         IdentityFile ~/.ssh/<filename>
+         IdentityFile ~/.ssh/ts-gpu-deepstream-key.pem
       ```
-
-4. Choose linux os
-5. Choose "Open folder" choose path to "VI-Live-Workshop-For-BE"
+1. Paste your user@ip (for example azureuser@40.124.109.198)
+1. Choose linux os
+1. Choose "Open folder" choose path to "VI-Live-Workshop-For-BE"
 
 #### Connecting to Dev Container within the VM
 
-1. Make sure the mounts has absolute path to data (update the env file)
-2. ctrl+shift+p and choose "Dev Containers: Open Folder in container"
+ctrl+shift+p and choose "Dev Containers: Open Folder in container"
  
 > [!TIP]
-> If you use a different/new user when creating the key run ```sudo usermod -a -G docker azureuser```. By adding a user to the docker group, you allow this user to run Docker commands without needing to use sudo each time.
+> If you used a different/new user when creating the key run ```sudo usermod -a -G docker azureuser```. By adding a user to the docker group, you allow this user to run Docker commands without needing to use sudo each time.

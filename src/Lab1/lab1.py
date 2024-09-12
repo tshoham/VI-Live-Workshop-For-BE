@@ -296,10 +296,8 @@ def create_pipeline_elements(args):
     rtppay = create_element("rtph264pay", "rtppay")
     
     # Make the UDP sink
-    updsink_port_num = 5400
     rtsp_sink = create_element("udpsink", "udpsink")
     rtsp_sink.set_property('host', '224.224.255.255')
-    rtsp_sink.set_property('port', updsink_port_num)
     rtsp_sink.set_property('async', False)
     rtsp_sink.set_property('sync', 1)
 
@@ -360,7 +358,8 @@ def main(args):
     # region Rtsp Out
     # Start streaming (If running rtsp out) - if running rtsp tests (2 or 4) then uncomment this region
     # # rtsp_port_num = 8554
-    
+    # # updsink_port_num = 5400
+    # # rtsp_sink.set_property('port', updsink_port_num)
     # # server = GstRtspServer.RTSPServer.new()
     # # server.props.service = "%d" % rtsp_port_num
     # # server.attach(None)
