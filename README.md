@@ -58,4 +58,4 @@ We will use [ts-gpu-deepstream](https://ms.portal.azure.com/#@microsoft.onmicros
 ctrl+shift+p and choose "Dev Containers: Open Folder in container"
  
 > [!TIP]
-> If you used a different/new user when creating the key run ```sudo usermod -a -G docker azureuser```. By adding a user to the docker group, you allow this user to run Docker commands without needing to use sudo each time.
+> If you used a different/new user when creating the key run ```sudo usermod -a -G docker <username>``` and ```sudo usermod -aG video <username>```. By adding a user to the docker group, you allow this user to run Docker commands without needing to use sudo each time.
