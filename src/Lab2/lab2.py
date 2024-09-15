@@ -302,7 +302,6 @@ def main(src_config: SrcConfig, sink_config: SinkConfig,
 
     pipeline.set_state(Gst.State.NULL)
 
-
 def parse_args():
     parser = argparse.ArgumentParser(description="deepstream_example multistream, inference reference app")
     parser.add_argument("-i", "--input", help="Path to input streams", nargs="+", metavar="URIs", required=True)
