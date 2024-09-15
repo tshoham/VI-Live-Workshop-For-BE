@@ -25,7 +25,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 
 1. At the beginning of the main method a pipeline was created ```pipeline = Gst.Pipeline()```.
     
-    You will add the following elements to the pipepline using ```pipeline.add(name_of_element)``` (all the elements are in **bold** numbered a, b, c...).
+    You will add the elements **a** through **h** below to the pipeline. Use ```pipeline.add(name_of_element)``` (all the elements are in **bold** numbered a, b, c...).
     
     Add your code where it says ```""" Add the elements to the pipeline here """```
     - This pipeline will get input from a h264 file source. The file will be parsed and decoded.
@@ -33,7 +33,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
         2. **h264parser**
         3. **decoder**
 
-    > [!NOTE]
+> [!NOTE]
 > H264 is a video file encoded with H.264 compression
 > H264 is the input of lab1 pipeline.
 > The file will go through a parser that will parse the stream and a decoder that will decode the stream into raw video frames for further processing
@@ -42,7 +42,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
         
         4. **streammux**
 
-    > [!NOTE]
+> [!NOTE]
 > streamux is a plugin used for multiplexing multiple input streams into a single output.
 > Multiplexing is a technique used in telecommunications and computer networking to combine multiple signals into one signal over a shared medium.
 
@@ -50,7 +50,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
     The inference element attaches some metadata to the buffer. We can later extract meaningful information from this buffer using a probe.
         
         5. **pgie**
-    > [!NOTE]
+> [!NOTE]
 > PGIE stands for "Primary GPU Inference Engine. SGIE is "Secondary GPU Inference Engine" 
 
     - The next to elements are for on screen display. They convert frames to rgba and create the on-screen-display
@@ -58,7 +58,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
         6. **nvvidconv**
         7. **nvosd**
 
-    > [!NOTE]
+> [!NOTE]
 > This is just for the demos and will most likely not run in production as FE will handle the displaying of the videos.
 
     - Lastly, the sink is linked in the pipeline.
@@ -71,7 +71,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 
     Add your code where it says ```""" Link the elements together here """```.
 
-    > [!IMPORTANT]
+> [!IMPORTANT]
 > 2 elements will be linked a bit differently in **all** the pipelines in this lab
 > decoder will be linked to the streammux as follows:
 > ```
