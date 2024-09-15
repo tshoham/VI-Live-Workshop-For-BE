@@ -112,7 +112,7 @@ This pipeline will have more than the simple detector. You will add a tracker an
 > [!IMPORTANT]
 > To view the rtsp output open your vlc player in you local machine
 > Click on ```Media``` then ```Open Network Stream```. Past the following URL: ```rtsp://40.124.109.198:554/ds-test```
-> Dont click Play yet!
+> **Don't** click Play yet!
 >
 > Have this ready before running the Lab in the VM. Once you run the Lab, wait until you see that the frames are being processd, and the click Play. 
 > This may fail once before connecting successfully.
