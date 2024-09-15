@@ -62,4 +62,4 @@ We will use [ts-gpu-deepstream](https://ms.portal.azure.com/#@microsoft.onmicros
 
 #### Connecting to Dev Container within the VM
 
-In Lab1 and Lab2 you will run the example in Dev Containers. In order to do this you need to ctrl+shift+p and choose "Dev Containers: Open Folder in container". Choose the folder of the workshop.
+In Lab1 and Lab2 you will run the example in Dev Containers. In order to do this you need to ctrl+shift+p and choose "Dev Containers: Open Folder in container". Choose the folder of the workshop "/home/azureuser/pair2/VI-Live-Workshop-For-BE/".
