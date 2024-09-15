@@ -41,8 +41,8 @@ We will write the part of the code that handle multiple inputs.
     2. Add the source element you created to the pipeline.
     3. Create a sinkpad for the streamux and verify the component. The sinkpad name will be `"sink_i"`.
 
-    > [!TIP]
-> Use lab1 readme for the syntax.
+        > [!TIP]
+> Use lab1 readme for the syntax of the sinkpad and the srcpad.
     > [!NOTE]
 > Pads are interfaces through which data flows in and out of elements.
 > An element can have multiple pads, so in this case we have a new pad for each source.
