@@ -56,7 +56,9 @@ We will use [ts-gpu-deepstream](https://ms.portal.azure.com/#@microsoft.onmicros
 1. Click  on the double arrow again and choose"Connect to Host"
 1. Paste azureuser@40.124.109.198 (for example azureuser@40.124.109.198)
 1. Choose linux os
-1. Click on file explorer and choose "Open folder". Choose path to "VI-Live-Workshop-For-BE"
+1. Click on file explorer and choose "Open folder".
+2. Choose path to according to your pair number - "/home/azureuser/pair2/VI-Live-Workshop-For-BE/"
+3. If prompted again, choose Linux
 
 #### Connecting to Dev Container within the VM
 
