@@ -178,11 +178,14 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
 
     return Gst.PadProbeReturn.OK
 
-def create_element(factory_name, element_name):
-    element = Gst.ElementFactory.make(factory_name, element_name)
-    if not element:
-        sys.stderr.write(f"Unable to create {element_name}\n")
-    return element
+def add_probe(nvosd):
+    # Lets add probe to get informed of the meta data generated, we add probe to
+    # the sink pad of the osd element, since by that time, the buffer would have
+    # had got all the metadata.
+    osdsinkpad = nvosd.get_static_pad("sink")
+    if not osdsinkpad:
+        sys.stderr.write("Unable to get sink pad of nvosd\n")
+    osdsinkpad.add_probe(Gst.PadProbeType.BUFFER, osd_sink_pad_buffer_probe, 0)
 
 def cofigure_tracker(tracker):
     #Set properties of tracker
@@ -216,22 +219,20 @@ def get_output_path(args):
     print(f"Creating FileSink for {output_path}\n")
     return output_path
 
-def add_probe(nvosd):
-    # Lets add probe to get informed of the meta data generated, we add probe to
-    # the sink pad of the osd element, since by that time, the buffer would have
-    # had got all the metadata.
-    osdsinkpad = nvosd.get_static_pad("sink")
-    if not osdsinkpad:
-        sys.stderr.write("Unable to get sink pad of nvosd\n")
-    osdsinkpad.add_probe(Gst.PadProbeType.BUFFER, osd_sink_pad_buffer_probe, 0)
+def create_element(factory_name, element_name):
+    element = Gst.ElementFactory.make(factory_name, element_name)
+    if not element:
+        sys.stderr.write(f"Unable to create {element_name}\n")
+    return element
 
 def create_pipeline_elements(args):
-        ## sources
+    # # sources
     # file_source element for reading from the file
     file_source = create_element("filesrc", "file-source")
     file_source.set_property("location", args[1])
     ## Parser
     # Since the data format in the input file is elementary h264 stream, we need a h264parser
+    # H264 file is a video file encoded with H.264 compression,
     h264parser = create_element("h264parse", "h264-parser")
 
     ## Decoder
@@ -240,6 +241,7 @@ def create_pipeline_elements(args):
 
     ## Streammux
     # Create nvstreammux instance to form batches from one or more sources.
+    # streamux is a plugin used for multiplexing multiple input streams into a single output
     streammux = create_element("nvstreammux", "Stream-muxer")
     print("Playing file %s " % args[1])
     if os.environ.get("USE_NEW_NVSTREAMMUX") != "yes":  # Only set these properties if not using new gst-nvstreammux

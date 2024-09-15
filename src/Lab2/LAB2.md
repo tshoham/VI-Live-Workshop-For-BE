@@ -39,16 +39,15 @@ We will write the part of the code that handle multiple inputs.
         - Where i is the index of the loop
 
     2. Add the source element you created to the pipeline.
-    3. Create a sinkpad for the streamux and verify the component. The sinkpad name will be `"sink_i"`.
+    3. Create a sinkpad for the streammux and srcpad for the source using the following syntax
+        `sinkpad = streammux.request_pad_simple(sinkpad_name)`
+        `srcpad = source_bin.get_static_pad("src")`
+        - The sinkpad_name will be `"sink_i"`.
 
-        > [!TIP]
-> Use lab1 readme for the syntax of the sinkpad and the srcpad.
     > [!NOTE]
 > Pads are interfaces through which data flows in and out of elements.
 > An element can have multiple pads, so in this case we have a new pad for each source.
 > Pads allow  modularity, flexibility, data flow control, dynamic linking, and compatibility.
-
-    4. create a srcpad for the source element and verify the component (use lab1 readme for syntax)
     
     1. Link srcpad to sinkpad.
 
@@ -58,11 +57,8 @@ We will write the part of the code that handle multiple inputs.
 2. Set the property `batch-size` of the pgie element and for streamumx (look for "Your implementation goes here" in the code)
 
     1. Set the "batch-size" property of the streammux to the number of sources: `streammux.set_property("batch-size", number_sources)`
-
-    2. Get the current batch size setting by running `pgie.get_property("batch-size")`
-    3. Compare the current batch size property to the number_sources. 
-    4. If they don't match then set the batch size property of the pgie element to the number of resources.
+    1. Set the "batch-size" property of the pgie to the number of sources: `pgie.set_property("batch-size", number_sources)`
 
     > [!NOTE]
-> Batch-size can be set in the AI inference configuration, and can also be updated from within the pipeline.
+> Batch-size can be set in the AI inference configuration file, and can also be updated from within the pipeline.
 > This is something we will need to update in VI when cameras are added/removed.

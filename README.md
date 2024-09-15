@@ -39,8 +39,10 @@ We will use [ts-gpu-deepstream](https://ms.portal.azure.com/#@microsoft.onmicros
 
 1. Connect to AzVpn
 1. Install "Remote - SSH" extension
-        ![alt text](image-1.png)
+        
+    ![alt text](image-1.png)
 1. In VSCode, on the bottom left, click on the double arrow >< sign
+
 ![alt text](image.png)
 1. Click "Connect to host"
 1. Click on "Configure SSH Hosts" (choose the file that starts with "C:Users...")
@@ -58,7 +60,4 @@ We will use [ts-gpu-deepstream](https://ms.portal.azure.com/#@microsoft.onmicros
 
 #### Connecting to Dev Container within the VM
 
-ctrl+shift+p and choose "Dev Containers: Open Folder in container"
- 
-> [!TIP]
-> If you used a different/new user when creating the key run ```sudo usermod -a -G docker <username>``` and ```sudo usermod -aG video <username>```. By adding a user to the docker group, you allow this user to run Docker commands without needing to use sudo each time.
+In Lab1 and Lab2 you will run the example in Dev Containers. In order to do this you need to ctrl+shift+p and choose "Dev Containers: Open Folder in container". Choose the folder of the workshop.

@@ -14,18 +14,13 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 > To run the test app: Go to Run and Debug (on the left) and choose "Lab 1"
 > You can see the run args (which is the input video) in ```launch.json```
 
-> [!IMPORTANT]
-> H264 is a video file encoded with H.264 compression
-> H264 is the input of lab1 pipeline.
-> The file will go through a parser that will parse the stream, and a decoder that will decode the stream into raw video frames for further processing
-
 ## Instructions
 
 ### Pipeline 1: Simple Detector Pipeline
 
 1. At the beginning of the main method a pipeline was created ```pipeline = Gst.Pipeline()```.
     
-    You will add the elements **a** through **h** below to the pipeline. Use ```pipeline.add(name_of_element)``` (all the elements are in **bold** numbered a, b, c...).
+    Add the elements **a** through **h** below to the pipeline. Use ```pipeline.add(name_of_element)``` (all the elements are in **bold** numbered a, b, c...).
     
     Add your code where it says ```""" Add the elements to the pipeline here """```
     - This pipeline will get input from a h264 file source. The file will be parsed and decoded.
@@ -66,19 +61,24 @@ We will go over all of the code very briefly and focus on the pipeline creation 
         8. **file_sink**
         
 
-2. You will now link all the elements in the order you created them, using the syntax:
+2. Link all the elements in the order you created them:
+    - link using the syntax:
     ```element_name.link(next_element)```
+    - 2 elements will be linked using "pads" (instead of the syntax above). 
+        Decoder will be linked to streammux using pads as follows:
+        ```
+        srcpad = decoder.get_static_pad("src")
+        sinkpad = streammux.request_pad_simple("sink_0")
+        srcpad.link(sinkpad)
+        ```
 
-    Add your code where it says ```""" Link the elements together here """```.
+    - Add your code where it says ```""" Link the elements together here """```.
 
-    > [!IMPORTANT]
-> 2 elements will be linked a bit differently in **all** the pipelines in this lab
-> decoder will be linked to the streammux as follows:
-> ```
-> srcpad = decoder.get_static_pad("src")
-> sinkpad = streammux.request_pad_simple("sink_0")
-> srcpad.link(sinkpad)
-> ```
+    > [!NOTE]
+> Pads are interfaces through which data flows in and out of elements.
+> An element can have multiple pads, so in this case we have a new pad for each source.
+> Pads allow  modularity, flexibility, data flow control, dynamic linking, and compatibility.
+
 
 3. Open the folder in dev container and run Lab 1.
 4. Look at the results and the detections.
@@ -108,7 +108,7 @@ This pipeline will have more than the simple detector. You will add a tracker an
 1. After that, the pipeline will continue to the converter, osd, and sink as in the previous example.
     Add **f** through **h** elements to the pipeline as well.
 
-2. Link all the elements taking in to account the linking of streammux and the decoder.
+2. Link all the elements. Add the "tracker", "sgie1", "sgie2" after the "Pgie" and before "nvvidconv". Take in to account the linking of streammux and the decoder.
 3. Open the folder in dev container and run Lab 1.
 4. Look at the results. Notice the tracker and car make + type that were added.
 
@@ -117,7 +117,7 @@ This pipeline will have more than the simple detector. You will add a tracker an
 > [!IMPORTANT]
 > To view the rtsp output open your vlc player in you local machine
 > Click on ```Media``` then ```Open Network Stream```. Past the following URL: ```rtsp://40.124.109.198:554/ds-test```
-> Dont click Play yet! 
+> Dont click Play yet!
 >
 > Have this ready before running the Lab in the VM. Once you run the Lab, wait until you see that the frames are being processd, and the click Play. 
 > This may fail once before connecting successfully.

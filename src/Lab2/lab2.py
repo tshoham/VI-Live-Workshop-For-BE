@@ -176,7 +176,7 @@ def start_rtsp_streaming(sink_config: SinkConfig):
 
     print(f"\n *** DeepStream: Launched RTSP Streaming at rtsp://localhost:{sink_config.rtsp_port}/{sink_config.mount_point} ***\n\n")
 
-def create_elements(pipeline, sink_config: SinkConfig):
+def create_elements(pipeline, number_sources, sink_config: SinkConfig):
     # Create nvstreammux instance to form batches from one or more sources
     streammux = create_element("nvstreammux", "Stream-muxer", pipeline)
     streammux.set_property("width", 1920)
@@ -219,7 +219,7 @@ def create_elements(pipeline, sink_config: SinkConfig):
 
 def create_and_link_sources(src_config: SrcConfig, number_sources, streammux, pipeline):
     """ Your implementation goes here for creating and linking sources """
-
+      
 def main(src_config: SrcConfig, sink_config: SinkConfig,
          write_insights=False):
     global insights_data
@@ -230,18 +230,19 @@ def main(src_config: SrcConfig, sink_config: SinkConfig,
 
     global perf_data
     perf_data = PERF_DATA(len(src_config.input_uris))
+    
+    # Standard GStreamer initialization
+    Gst.init(None)
     print("Creating Pipeline\n")
     pipeline = Gst.Pipeline()
     verify_component(pipeline, "Pipeline")
     
     number_sources = len(src_config.input_uris)
 
-    # Standard GStreamer initialization
-    Gst.init(None)
 
     # Create gstreamer elements
     # Create Pipeline elements that will form a connection of other elements
-    streammux, queue1, queue2, queue3, queue4, queue5, queue6, pgie, tracker, tiler, nvvidconv, nvosd, sink = create_elements(pipeline, sink_config)
+    streammux, queue1, queue2, queue3, queue4, queue5, queue6, pgie, tracker, tiler, nvvidconv, nvosd, sink = create_elements(pipeline, number_sources, sink_config)
 
     """  Your implementation goes here for setting batch-size properties """
 
