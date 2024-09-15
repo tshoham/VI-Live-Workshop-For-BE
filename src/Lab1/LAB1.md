@@ -9,11 +9,6 @@ We mentioned that GStreamer's benefits consist of "Modular Architecture", and we
 lab1.py is a sample that consists of 4 different pipeline options.
 We will go over all of the code very briefly and focus on the pipeline creation and element linking. 
 
-> [!NOTE]
-> Notice the input is a h264 stream. You can use ```https://anyconv.com/mp4-to-h264-converter/``` to convert standard video.
-> To run the test app: Go to Run and Debug (on the left) and choose "Lab 1"
-> You can see the run args (which is the input video) in ```launch.json```
-
 ## Instructions
 
 ### Pipeline 1: Simple Detector Pipeline
@@ -142,3 +137,8 @@ This example is a combination of example 2 and 3 - the AI inferences from exampl
 1. Add all the relevant elements to the pipeline
 2. Link all the elements.
 3. Run the example.
+
+> [!NOTE]
+> Notice the input is a h264 stream. You can use ```https://anyconv.com/mp4-to-h264-converter/``` to convert standard video.
+> To run the test app: Go to Run and Debug (on the left) and choose "Lab 1"
+> You can see the run args (which is the input video) in ```launch.json```
