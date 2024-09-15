@@ -10,7 +10,7 @@ lab1.py is a sample that consists of 4 different pipeline options.
 We will go over all of the code very briefly and focus on the pipeline creation and element linking. 
 
 > [!NOTE]
-> Notice the input is a h264 stream. You can use `https://anyconv.com/mp4-to-h264-converter/` to convert standard video.
+> Notice the input is a h264 stream. You can use ```https://anyconv.com/mp4-to-h264-converter/``` to convert standard video.
 > To run the test app: Go to Run and Debug (on the left) and choose "Lab 1"
 > You can see the run args (which is the input video) in ```launch.json```
 
@@ -27,34 +27,34 @@ We will go over all of the code very briefly and focus on the pipeline creation 
         1. **file_source**
         2. **h264parser**
         3. **decoder**
-
-    > [!NOTE]
-> H264 is a video file encoded with H.264 compression
-> H264 is the input of lab1 pipeline.
-> The file will go through a parser that will parse the stream and a decoder that will decode the stream into raw video frames for further processing
+     
+        > **NOTE:**
+        > H264 is a video file encoded with H.264 compression
+        > H264 is the input of lab1 pipeline.
+        > The file will go through a parser that will parse the stream and a decoder that will decode the stream into raw video frames for further processing
 
     - The pipeline will then continue to the streamux.
-        
+      
         4. **streammux**
-
-    > [!NOTE]
-> streamux is a plugin used for multiplexing multiple input streams into a single output.
-> Multiplexing is a technique used in telecommunications and computer networking to combine multiple signals into one signal over a shared medium.
+      
+        > **NOTE:**
+        > streammux is a plugin used for multiplexing multiple input streams into a single output.
+        > Multiplexing is a technique used in telecommunications and computer networking to combine multiple signals into one signal over a shared medium.
 
     - The next element is pgie. This is Nvidia's 4 class detector. It detects "Vehicle , RoadSign, TwoWheeler, Person".
     The inference element attaches some metadata to the buffer. We can later extract meaningful information from this buffer using a probe.
         
         5. **pgie**
-    > [!NOTE]
-> PGIE stands for "Primary GPU Inference Engine. SGIE is "Secondary GPU Inference Engine" 
+        > **NOTE:**
+        > PGIE stands for "Primary GPU Inference Engine. SGIE is "Secondary GPU Inference Engine" 
 
     - The next to elements are for on screen display. They convert frames to rgba and create the on-screen-display
         
         6. **nvvidconv**
         7. **nvosd**
 
-    > [!NOTE]
-> This is just for the demos and will most likely not run in production as FE will handle the displaying of the videos.
+        > **NOTE:**
+        > On screen display is just for the demos and will most likely not run in production as FE will handle the displaying of the videos.
 
     - Lastly, the sink is linked in the pipeline.
     
@@ -65,7 +65,7 @@ We will go over all of the code very briefly and focus on the pipeline creation 
     - link using the syntax:
     ```element_name.link(next_element)```
     - 2 elements will be linked using "pads" (instead of the syntax above). 
-        Decoder will be linked to streammux using pads as follows:
+        The Decoder will be linked to streammux using pads as follows:
         ```
         srcpad = decoder.get_static_pad("src")
         sinkpad = streammux.request_pad_simple("sink_0")
@@ -74,10 +74,10 @@ We will go over all of the code very briefly and focus on the pipeline creation 
 
     - Add your code where it says ```""" Link the elements together here """```.
 
-    > [!NOTE]
-> Pads are interfaces through which data flows in and out of elements.
-> An element can have multiple pads, so in this case we have a new pad for each source.
-> Pads allow  modularity, flexibility, data flow control, dynamic linking, and compatibility.
+        > **NOTE:**
+        > Pads are interfaces through which data flows in and out of elements.
+        > An element can have multiple pads, so in this case we have a new pad for each source.
+        > Pads allow  modularity, flexibility, data flow control, dynamic linking, and compatibility.
 
 
 3. Open the folder in dev container and run Lab 1.
@@ -99,13 +99,13 @@ This pipeline will have more than the simple detector. You will add a tracker an
 
     Add elements **a** through **e** to the pipeline.
 
-1. After the pgie, we will **add** a tracker and 2 more AI inferences to the pipeline:
+1. After the pgie, **add** a tracker and 2 more AI inferences to the pipeline:
 
     1. **tracker**
     2. **sgie1** - this is a car make classifier
     3. **sgie2** - this is a car type classifier
 
-1. After that, the pipeline will continue to the converter, osd, and sink as in the previous example.
+1. After sgie2, the pipeline will continue to the converter, osd, and sink as in the previous example.
     Add **f** through **h** elements to the pipeline as well.
 
 2. Link all the elements. Add the "tracker", "sgie1", "sgie2" after the "Pgie" and before "nvvidconv". Take in to account the linking of streammux and the decoder.
