@@ -35,30 +35,30 @@ We will write the part of the code that handle multiple inputs.
     
     For each index do the following:
 
-    1. Call function `create_source_bin(src_config, i)`
-        - Where i is the index of the loop
+    1. Call function `create_source_bin(src_config, i)` to create the source element.
+        - Where `i` is the index of the loop
 
-    2. Add the source element you created to the pipeline.
+    2. Add the source element you created to the pipeline (`pipeline.add(src_element)`
     3. Create a sinkpad for the streammux and srcpad for the source using the following syntax
         `sinkpad = streammux.request_pad_simple(sinkpad_name)`
         `srcpad = source_bin.get_static_pad("src")`
-        - The sinkpad_name will be `"sink_i"`.
+        - **The sinkpad_name will be `"sink_i"`.**
+    4. Link the srcpad to the sinkpad
 
-    > [!NOTE]
-> Pads are interfaces through which data flows in and out of elements.
-> An element can have multiple pads, so in this case we have a new pad for each source.
-> Pads allow  modularity, flexibility, data flow control, dynamic linking, and compatibility.
-    
-    1. Link srcpad to sinkpad.
-
-    > [!NOTE]
-> You are linking each source to a sinkpad of the streammux. Notice how the streamux has one link to the rest of the pipeline.
+        > **NOTE:**
+        > Pads are interfaces through which data flows in and out of elements.
+        > An element can have multiple pads, so in this case we have a new pad for each source.
+        > Pads allow  modularity, flexibility, data flow control, dynamic linking, and compatibility.
 
 2. Set the property `batch-size` of the pgie element and for streamumx (look for "Your implementation goes here" in the code)
 
     1. Set the "batch-size" property of the streammux to the number of sources: `streammux.set_property("batch-size", number_sources)`
     1. Set the "batch-size" property of the pgie to the number of sources: `pgie.set_property("batch-size", number_sources)`
 
-    > [!NOTE]
+> [!NOTE]
 > Batch-size can be set in the AI inference configuration file, and can also be updated from within the pipeline.
 > This is something we will need to update in VI when cameras are added/removed.
+
+3. Open the folder in dev container and run Lab 2.
+4. View the file created in your local machine (copy to you compputer). Notice the tiled results.
+
